@@ -1,0 +1,187 @@
+testmoter（旧）
+
+#include <FlexiTimer2.h>
+#include <TimerOne.h>
+int S0=0;
+int S1=0;
+int S2=0;
+int S3=0;
+int S4=0;
+
+int n=0;  
+int il=0 , ir=0;  //パルス幅調整用
+int ls=0 , rs=0;  //パルス幅調整用
+boolean outputl=LOW;  //パルス用変数
+boolean outputr=LOW;  //パルス用変数
+boolean outcvl=LOW;  //回転方向用変数
+boolean outcvr=HIGH;  //回転方向用変数
+
+
+//パルス出力用割り込み関数 us単位で呼び出される。
+void timerPulse(){
+
+  if(il > ls){
+    digitalWrite(9,outputl);  //9番ピン(LED)に出力する(HIGH>ON LOW>OFF)
+    outputl = ! outputl;      //出力信号反転
+    il=1.0;//元の速度の変更0.1→1.0早くなる
+  }
+
+  if(ir > rs){
+    digitalWrite(12,outputr); //12番ピン(LED)に出力する(HIGH>ON LOW>OFF)
+    outputr = ! outputr;       //出力信号反転
+    ir=1.0;//元の速度の変更0.1→1.0早くなる
+  }
+  
+  il++;
+  ir++;
+  n++;
+    
+}
+
+
+void setup() {
+  Serial.begin(9600);
+    /*pinMode(0,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(1,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(2,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(3,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(4,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(5,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(6,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(7,OUTPUT); //ピンをデジタル出力に設定
+     */pinMode(8,OUTPUT); //ピンをデジタル出力に設定
+       pinMode(9,OUTPUT); //ピンをデジタル出力に設定
+      
+     pinMode(10,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(11,OUTPUT); //ピンをデジタル出力に設定
+     pinMode(12,OUTPUT); //ピンをデジタル出力に設定
+     //pinMode(A3,OUTPUT); //アナログピンをデジタル出力に設定
+     //pinMode(A4,OUTPUT); //アナログピンをデジタル出力に設定
+     pinMode(A5,OUTPUT); //アナログピンをデジタル出力に設定
+
+     pinMode(13,OUTPUT); //ピンをデジタル出力に設定
+     // pinMode(A0,OUTPUT); //アナログピンをデジタル出力に設定
+     // pinMode(A1,OUTPUT); //アナログピンをデジタル出力に設定
+     
+     digitalWrite(10, LOW); //10番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+     digitalWrite(11, LOW); //11番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+     digitalWrite(12, LOW); //12番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+     digitalWrite(13, LOW); //13番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+     digitalWrite(A3, LOW); //A3番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+     digitalWrite(A4, LOW); //A4番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+     digitalWrite(A5, LOW); //A5番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+
+    //タイマー割り込み設定
+     Timer1.initialize(500); //500us マイクロ秒単位で設定
+     Timer1.attachInterrupt(timerPulse);
+     
+}
+
+void loop() {
+
+
+
+  
+  S0=analogRead(0);//一番右
+  S1=analogRead(1);
+  S2=analogRead(2);
+  S3=analogRead(3);//一番左
+  S4=analogRead(4);//ゴールライン専用
+  
+ Serial.print(S0);
+  Serial.print("\t");
+  Serial.print(S1);
+  Serial.print("\t");
+  Serial.print(S2);
+  Serial.print("\t");
+  Serial.print(S3);
+  Serial.print("\t");
+  Serial.print(S4);
+  Serial.println("\t");
+
+
+  
+digitalWrite(8, outcvl); //回転方向　8番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+digitalWrite(11, outcvr); //回転方向　11番ピン(LED)に出力する (HIGH>ON LOW>OFF)
+digitalWrite(10,HIGH); //モータON 10番ピン(LED)にHIGHを出力する (HIGH>ON LOW>OFF)
+ 
+if(S1>60&&S2>60){
+ls=1.0;
+rs=1.0; //switch文
+}//白
+
+if(S1<40&&S2<40){
+  ls=1.0;//右
+  rs=1.0;//左
+  }//黒
+  
+if(S3>60&&S2<40){
+  ls=2.0;//右
+  rs=1.0;//左
+  //中心二つ
+}
+  if(S3<40&&S2>60){
+ls=1.0;//右
+rs=2.0;//左
+    }
+    //中心二つ
+  
+ if(S2>60&&S1<40){
+ls=3.0;//右
+rs=1.0;//左
+  }
+  if(S4<40&&S3>60){
+ls=1.0;//右
+rs=3.0;//左
+  }
+ /* if(S2>50&&S3>50){
+ls=1.5;//右
+rs=7.8;//左
+   
+    }
+  if(S1>50&&S0>50){
+ ls=7.8;//右
+ rs=1.5;//左
+    }
+
+if(S3>60&&S0<40&&S1<40&&S2<40){
+  ls=1.5;
+  rs=7.5;
+  }
+  if(S0>60&&S3<40&&S1<40&&S2<40){
+  ls=7.5;//右
+  rs=1.5;
+  }*/
+if(S0>60){
+  outputl=HIGH;//パルス用変数
+    //パルス用変数
+  
+}
+}
+
+ 
+ 
+/*//////////////////////////////////////////////////////////////////////////////////////////////
+//スイッチ文を使って割り込みスピードを制御できる？
+//ステップ距離（仮）0.8954
+//ステップ速度（パルス周波数）割り込みスピード約250000usで１pps
+//割り込みスピードからパルス周波数を割り出す計算式が必要
+//100(1ステップのパルス幅):1pps=今のパルス幅:今のパルス周波数
+//今のパルス周波数＝今のパルス幅/100
+double NP=0;
+NP=X/100;
+int S=0;//速度
+//速度＝パルス周波数＊ステップ距離
+S=NP*0.8954;
+
+*/
+////////////////////////////////////////////////////////////////////////////////////////////////
+   
+
+
+
+ 
+
+
+ 
+    
