@@ -218,7 +218,7 @@ Serial.println(ppsL);
   S2=analogRead(MRIGHT);//2番ﾋﾟﾝ
   S3=analogRead(RIGHT);//3番ﾋﾟﾝ
 
-
+//P制御
    
  diffL=targetL-S1;
  diffR=targetR-S2;
