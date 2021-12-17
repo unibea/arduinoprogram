@@ -1,4 +1,6 @@
+#include <TimerThree.h>
 #include <TimerOne.h>
+
 //一番後ろのｻｰﾎﾞの値:1150閉める1700開ける
 //一番前のｻｰﾎﾞ値:1380で前向く値:2300でしまう
 //
@@ -78,32 +80,27 @@ const int signal = 12;//buzzer
 int sen=5;
 
 ////////////////////////////////////////////////////////////////////////
-void timerPulse() {
-  if(il>ls){//ここを何秒で実行する という風にへんこうする?割り込みは500usなのでそれを基準に設定
-    digitalWrite(CLOCK_L,outputl);
-    outputl = !outputl;
-    il=0;
-    Pulse1++;
-  }
- 
-  if(ir>rs){
+void timerPulse1() {
     digitalWrite(CLOCK_R,outputr);
     outputr = !outputr;
-    ir=0;
     Pulse2++;
-  }
- il++;
- ir++;
+    if(Pulse2==2){
+        StepR++;
+        Pulse2=0;
+      }//ｽﾃｯﾌﾟ数の算出と距離の測定
+    
+}
+
+void timerPulse2() {
+  digitalWrite(CLOCK_L,outputl);
+  outputl = !outputl;
+  Pulse1++;
   if(Pulse1==2){
         StepL++;
         Pulse1=0;
-      }//ｽﾃｯﾌﾟ数の算出と距離の測定
-  if(Pulse2==2){
-        StepR++;
-        Pulse2=0;
       }
-       
 }
+
 
 //シフト㊞カラーセンサー関数に使用
 
@@ -279,29 +276,31 @@ void se(double noteNum, double len){
   }
   
 }
+//パルス周波数を割り込み速度を変換
+double spchL(double warikomiL){
+    return (1/(2*warikomiL))*1000000;
+  }
 
+double spchR(double warikomiR){
+    return (1/(2*warikomiR))*1000000;
+  }
 
-const float Kp=1;
-  const int targetL=560;
-  const int targetR=590;
-  const int bias=0;
+//割り込みスピード用変数
+int HzSPL=spchL(1000),HzSPR=spchR(1000);
 
-  int diffL=0;
-  int diffR=0;
+const float Kp=0.7;
+const int targetL=530;
+const int targetR=530;
+const int bias=0;
 
-  int diffLkako=0;
-  int diffRkako=0;
-
-  int out1=0;
-  int out2=0;
-
-  int turnL = Kp*diffL+bias;
-  int turnR = Kp*diffR+bias;
-
-  int DR=0;
+int diffL=0,diffR=0;
+int outL=0,outR=0;
 
 void trace (){
-   Timer1.attachInterrupt(timerPulse);//timerstart
+  Timer1.attachInterrupt(timerPulse1);
+  Timer3.attachInterrupt(timerPulse2);
+  Timer1.initialize(HzSPL);
+  Timer3.initialize(HzSPR);
   
 //  1ｽﾃｯﾌﾟで0.6535mm進む
   //Serial.print(S0);
@@ -314,12 +313,6 @@ void trace (){
   Serial.print("\t");
   Serial.print(diffL);
   Serial.print("\t");
-  Serial.print(out1);
-  Serial.print("\t");
-  Serial.print(out2);
-  Serial.print("\t");
-  Serial.print(DR);
-  Serial.print("\t");
   Serial.println();
  
 
@@ -328,42 +321,20 @@ void trace (){
   S2=analogRead(MRIGHT);//2番ﾋﾟﾝ
   S3=analogRead(RIGHT);//3番ﾋﾟﾝ
 
- 
-  const float Kp=1;
-  const int targetL=550;
-  const int targetR=560;
-  const int bias=0;
-  const double dt=0.025;
-  
+   diffL=targetL-S1;
+ diffR=targetR-S2;
 
-   diffL=S1-targetL;//-450 ~ 450
-   diffR=S2-targetR;//-500 ~ 450
+  outL=Kp*diffL+bias;
+  outR=Kp*diffR+bias;
 
-  out1=map(diffL,-450,450,0,4);
-  out2=map(diffR,-500,450,0,4);
-  
-  int PR = Kp*out1+bias;
-  int PL = Kp*out2+bias;
+   HzSPL=spchL(450+outL);
+   HzSPR=spchR(450+outR);
 
-/*
-  Serial.print(diffL);
-  Serial.print("\t");
-  Serial.print(diffLkako);
-  Serial.print("\t");
-  Serial.println();
 
-  double DR = (diffL-diffLkako)/dt;
-  Serial.print("\t");
-  Serial.print("\t");
-  Serial.print("\t");
-  Serial.print("\t");
-  Serial.println(DR);
-  */
-  ls=1.0+PL;
-  rs=1.0+PR; //ポンコツP制御（仮）
-
- diffLkako=diffL;
- diffRkako=diffR;
+  if(S1>850&&S2>850){
+   HzSPL=spchL(450);
+   HzSPR=spchR(450);
+    } //何もなければ直進
       //ラインカウンタ
       if(point==0){
           if(S0<500&&S3<500&&S1<500){
@@ -410,19 +381,20 @@ void servoloopR(){
 
 //旋回R
 void senkaiR(int spl,int Step){
-  Serial.print("右旋回します。");
+  Serial.print("右旋回");
    Timer1.detachInterrupt();
-   Serial.print('1');
-   delay(500);
+   Timer3.detachInterrupt();
+   delay(50);
    digitalWrite(CWCCW_L,LOW);//回転方向変更
    digitalWrite(CWCCW_R,LOW);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(500);
-   ls=spl;
-   rs=spl;   
-   Timer1.attachInterrupt(timerPulse);
+   delay(50);
+   Timer1.initialize(spchL(spl));
+   Timer3.initialize(spchR(spl)); 
+   Timer1.attachInterrupt(timerPulse1);
+   Timer3.attachInterrupt(timerPulse2);
    while(1){
     Serial.print('\t');
     Serial.println(StepL);////////////////なぜかｼﾘｱﾙﾌﾟﾘﾝﾄであたいを表示するとif文が機能する?
@@ -430,51 +402,66 @@ void senkaiR(int spl,int Step){
       break;
       }
     }
-     Timer1.detachInterrupt(); 
+     Timer1.detachInterrupt();
+     Timer3.detachInterrupt(); 
      digitalWrite(CWCCW_L,HIGH);
      Serial.print('3');
      delay(1000); 
   }
-  
+ 
   //直進
-int tyokusin(int Speed,int Step)  {
-    
+int tyokusin(int spl,int Step)  {
+  Serial.print("直進");
     Timer1.detachInterrupt();
-   digitalWrite(CWCCW_R,LOW);
-   digitalWrite(CWCCW_L,HIGH);
+   Timer3.detachInterrupt();
+   delay(50);
+   digitalWrite(CWCCW_L,HIGH);//回転方向変更
+   digitalWrite(CWCCW_R,LOW);//回転方向変更
    StepL=0;
-   StepR=0;
-   delay(100);
-   ls=Speed;
-   rs=Speed;
-   Timer1.attachInterrupt(timerPulse);
+   StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
+   Serial.print('2');
+   delay(50);
+   Timer1.initialize(spchL(spl));
+   Timer3.initialize(spchR(spl)); 
+   Timer1.attachInterrupt(timerPulse1);
+   Timer3.attachInterrupt(timerPulse2);
    while(1){
-    Serial.println(Step);
-    if(StepL>Step){
+    Serial.print('\t');
+    Serial.println(StepL);////////////////なぜかｼﾘｱﾙﾌﾟﾘﾝﾄであたいを表示するとif文が機能する?
+     if(StepL>Step){
       break;
       }
     }
-    Timer1.detachInterrupt();
-    delay(10);  
+     Timer1.detachInterrupt();
+     Timer3.detachInterrupt();
+
+     Serial.print('3');
+     delay(1000); 
+     
   }
 
-  int tyokusinS(int Speed)  {
-    
+
+  int tyokusinS()  {
+  Serial.print("直進");
     Timer1.detachInterrupt();
-   digitalWrite(CWCCW_R,LOW);
-   digitalWrite(CWCCW_L,HIGH);
-   delay(100);
-   ls=Speed;
-   rs=Speed;
-   
-   Timer1.attachInterrupt(timerPulse);
+   Timer3.detachInterrupt();
+   delay(50);
+   digitalWrite(CWCCW_L,HIGH);//回転方向変更
+   digitalWrite(CWCCW_R,LOW);//回転方向変更
+   StepL=0;
+   StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
+   Serial.print('2');
+   delay(50);
+   Timer1.initialize(spchL(500));
+   Timer3.initialize(spchR(500)); 
+   Timer1.attachInterrupt(timerPulse1);
+   Timer3.attachInterrupt(timerPulse2);
    while(1){
-    Serial.println(count);
     S0=analogRead(LEFT);//0番ﾋﾟﾝ
     S1=analogRead(MLEFT);//1番ﾋﾟﾝ
     S2=analogRead(MRIGHT);//2番ﾋﾟﾝ
     S3=analogRead(RIGHT);//3番ﾋﾟﾝ
-         //ラインカウンタ
+     //ラインカウンタ
       if(point==0){
           if(S0<500&&S3<500&&S1<500){
             count++;
@@ -484,65 +471,79 @@ int tyokusin(int Speed,int Step)  {
        if(S0>600&&S3>600){
         point=0;
         }
-
-    if(count==2){
+     if(count==2){
+      phase=1;
       break;
       }
-
     }
-    Timer1.detachInterrupt();
-    delay(10);  
+     Timer1.detachInterrupt();
+     Timer3.detachInterrupt();
+
+     Serial.print('3');
+     delay(1000); 
+     
   }
-  
+
   
   //後進
-int kousin(int Speed,int Step)  {
+int kousin(int spl,int Step)  {
   Serial.print("後進します");
-    Timer1.detachInterrupt();
-   digitalWrite(CWCCW_R,HIGH);
-   digitalWrite(CWCCW_L,LOW);
+   Timer1.detachInterrupt();
+   Timer3.detachInterrupt();
+   delay(50);
+   digitalWrite(CWCCW_L,LOW);//回転方向変更
+   digitalWrite(CWCCW_R,HIGH);//回転方向変更
    StepL=0;
-   StepR=0;
-   delay(100);
-   ls=Speed;
-   rs=Speed;
-   Timer1.attachInterrupt(timerPulse);
+   StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
+   Serial.print('2');
+   delay(50);
+   Timer1.initialize(spchL(spl));
+   Timer3.initialize(spchR(spl)); 
+   Timer1.attachInterrupt(timerPulse1);
+   Timer3.attachInterrupt(timerPulse2);
    while(1){
-    Serial.println(Step);
-    if(StepL>Step){
+    Serial.print('\t');
+    Serial.println(StepL);////////////////なぜかｼﾘｱﾙﾌﾟﾘﾝﾄであたいを表示するとif文が機能する?
+     if(StepL>Step){
       break;
       }
     }
-    Timer1.detachInterrupt();
-    delay(10);  
+     Timer1.detachInterrupt();
+     Timer3.detachInterrupt();
+     digitalWrite(CWCCW_L,HIGH);//回転方向変更
+   digitalWrite(CWCCW_R,LOW);//回転方向変更 
+     Serial.print('3');
+     delay(1000); 
   }
   
   //旋回L
-int senkaiL(int SPR,int Step){
-  Serial.print("左旋回します。");
+int senkaiL(int spl,int Step){
+ Serial.print("左旋回");
    Timer1.detachInterrupt();
-   Serial.print('1');
-   delay(500);
-   digitalWrite(CWCCW_R,HIGH);//回転方向変更
+   Timer3.detachInterrupt();
+   delay(50);
    digitalWrite(CWCCW_L,HIGH);//回転方向変更
+   digitalWrite(CWCCW_R,HIGH);//回転方向変更
    StepL=0;
-   StepR=0;//ステップ数リセット
+   StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(500);
-   ls=SPR;
-   rs=SPR;   
-   Timer1.attachInterrupt(timerPulse);
+   delay(50);
+   Timer1.initialize(spchL(spl));
+   Timer3.initialize(spchR(spl)); 
+   Timer1.attachInterrupt(timerPulse1);
+   Timer3.attachInterrupt(timerPulse2);
    while(1){
     Serial.print('\t');
-    Serial.println(StepR);////////////////なぜかシリアルプリントであたいを表示するとif文が機能する？
-     if(StepR>Step){
+    Serial.println(StepL);////////////////なぜかｼﾘｱﾙﾌﾟﾘﾝﾄであたいを表示するとif文が機能する?
+     if(StepL>Step){
       break;
       }
     }
-     Timer1.detachInterrupt(); 
+     Timer1.detachInterrupt();
+     Timer3.detachInterrupt(); 
      digitalWrite(CWCCW_R,LOW);
      Serial.print('3');
-     delay(1000);
+     delay(1000); 
 }
 
 int DFL=0;
@@ -552,10 +553,11 @@ int j=-100;
 
 //探索
  int tansaku(){
-  senkaiL(1.0,360);
+  senkaiL(500,360);
    Timer1.detachInterrupt();
+   Timer3.detachInterrupt();
    Serial.print('1');
-   delay(500);
+   delay(50);
    digitalWrite(CWCCW_L,LOW);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
@@ -563,7 +565,8 @@ int j=-100;
    delay(500);
    ls=10.0;
    rs=10.0;   
-   Timer1.attachInterrupt(timerPulse);
+   Timer1.attachInterrupt(timerPulse1);
+   Timer3.attachInterrupt(timerPulse2);
    while(1){
     T0=analogRead(7);
     Serial.print('\t');
@@ -578,6 +581,7 @@ int j=-100;
       }
    }    
      Timer1.detachInterrupt();
+     Timer3.detachInterrupt();
      digitalWrite(CWCCW_L,HIGH);
      if(T0>550){ 
       //DFL=StepL;
@@ -587,21 +591,24 @@ int j=-100;
     }
     return 4;
   }
-  senkaiL(1.0,360);
-  tyokusin(1.0,100);
+  senkaiL(500,360);
+  tyokusin(500,100);
   return 3;
  }
  
 //回収
 void kaisyuu(){
     Timer1.detachInterrupt();
+    Timer3.detachInterrupt();
     Serial.print("11");
     delay(500);
     ls=10.0;
     rs=10.0;
     StepL=0;
     StepR=0;
-    Timer1.attachInterrupt(timerPulse);
+    Timer1.attachInterrupt(timerPulse1);
+    Timer3.attachInterrupt(timerPulse2);
+    
     for(int i=-2000;i<0;i++){
        servoloopL();       
        servoloopR();
@@ -620,7 +627,8 @@ void kaisyuu(){
       
       StepL=0;
       delay(2000);
-      Timer1.attachInterrupt(timerPulse);
+      Timer1.attachInterrupt(timerPulse1);
+      Timer3.attachInterrupt(timerPulse2);
       while(1){
         Serial.print(StepL);
         Serial.print(" ");
@@ -630,6 +638,7 @@ void kaisyuu(){
           }  
         }
         Timer1.detachInterrupt();
+        Timer3.detachInterrupt();
         delay(1500);
    }
 
@@ -649,6 +658,7 @@ float SpeedR(int rs){
   SR=ST*400;//1回転のスピード
   return SR/58; //タイヤの直径仮で60mm
   }
+
 
 void setup() {/////////////////////////////////////////////////////////////////////setup()/////////////////
   //ｼﾘｱﾙ通信
@@ -725,10 +735,12 @@ void setup() {//////////////////////////////////////////////////////////////////
   
   digitalWrite(MOTOR_ONOFFL,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
   digitalWrite(MOTOR_ONOFFR,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
-   
-     //ﾀｲﾏｰ割り込み設定
-  Timer1.initialize(500);//500ﾏｲｸﾛ秒単位で設定(250000で1秒に1ﾊﾟﾙｽ)
-  Timer1.attachInterrupt(timerPulse);
+        //ﾀｲﾏｰ割り込み設定
+ Timer1.initialize(500);//ﾏｲｸﾛ秒単位で設定(500000us=0.5sで1秒に1ﾊﾟﾙｽ)
+  Timer1.attachInterrupt(timerPulse1);
+
+ Timer3.initialize(500);//仮
+ Timer3.attachInterrupt(timerPulse2);
 }//void setup END...
 int d=0,s=0;
 void loop() {
@@ -736,19 +748,18 @@ void loop() {
     case 0:
         Serial.print("スタートしてとりあえず直進しますよ〜〜〜");
         Serial.println(count);
-        
-        tyokusinS(1.0);
-        if(count==2){phase=1;}
+        tyokusinS();
+       // if(count==2){phase=1;}
       break;
     case 1:
         Serial.println("ここで自由ボールを落としますよ〜");
-        senkaiR(1.0,360);//90度旋回
+        senkaiR(500,360);//90度旋回
         delay(500);
-        kousin(1.0,300);
+        kousin(500,300);
         delay(500);
-        tyokusin(1.0,300);
+        tyokusin(500,300);
         delay(500);
-        senkaiL(1.0,360);
+        senkaiL(500,360);
         phase=2;
       break;
     case 2:
@@ -756,8 +767,8 @@ void loop() {
         trace();
         if(count==5){
             Serial.println("if文の中ですよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
-            kousin(1.0,1000);
-            tyokusin(1.0,800);
+            kousin(500,1000);
+            tyokusin(500,800);
             delay(750);
             phase=3;
           }
@@ -774,15 +785,15 @@ void loop() {
      case 5:
           Serial.println("ボールを持ってゴールまで向かいますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
           Serial.println(DFL);
-          senkaiR(1.0,740-DFL);//ズレすぎ？760
+          senkaiR(500,740-DFL);//ズレすぎ？760
           delay(10);
-          senkaiR(1.0,330);//変更点360で90度
+          senkaiR(500,330);//変更点360で90度
           delay(10);
-          tyokusin(1.0,2000);
+          tyokusin(500,2000);
           delay(10);
-          kousin(1.0,100);//もとは300
+          kousin(500,100);//もとは300
           delay(10);
-          senkaiL(1.0,400);//もとは360
+          senkaiL(500,400);//もとは360
           //delay(10);
           //colorti=colorcheck();
           //Serial.println(colorti);
@@ -808,9 +819,9 @@ void loop() {
           Serial.print("赤色が選択されました");
           trace();
           if(count==3){
-            senkaiL(1.0,360);
+            senkaiL(500,360);
             delay(1000);
-            kousin(1.0,200);//落ちないか確認
+            kousin(500,200);//落ちないか確認
             while(j<1000){
            servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
            j++;
@@ -821,9 +832,9 @@ void loop() {
            j++;
           }        
             delay(1000);      
-            tyokusin(1.0,200);
+            tyokusin(500,200);
             delay(1);
-            senkaiL(1.0,360);
+            senkaiL(500,360);
             count=2;
             }
           
@@ -837,9 +848,9 @@ void loop() {
             Serial.print("青色が選択されました");
           trace(); 
           if(count==1){
-            senkaiL(1.0,720);
+            senkaiL(500,720);
             delay(1000);
-            kousin(1.0,400);//落ちないか確認
+            kousin(500,400);//落ちないか確認
             while(j<0){
            servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
            j++;
@@ -850,7 +861,7 @@ void loop() {
            j++;
           }         
             delay(1000);
-            tyokusin(1.0,400);
+            tyokusin(500,400);
             count=3;
             phase=2;
               }      
@@ -872,9 +883,9 @@ void loop() {
           Serial.print("黄色が選択されました");
           trace();
           if(count==2){
-            senkaiL(1.0,360);
+            senkaiL(500,360);
             delay(1000);
-            kousin(1.0,200);//落ちないか確認
+            kousin(500,200);//落ちないか確認
             while(j<0){
            servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
            j++;
@@ -886,8 +897,8 @@ void loop() {
           }         
           Serial.print("黄色のボールを落としました。");
             delay(1000);
-             tyokusin(1.0,200);
-             senkaiL(1.0,360);
+             tyokusin(500,200);
+             senkaiL(500,360);
              count=3;
              phase=2;     
             }
