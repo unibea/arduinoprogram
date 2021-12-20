@@ -68,6 +68,26 @@ const int signal = 12;//buzzer
 
 int sen=5;
 
+double spchL(double warikomiL){
+    return (1/(2*warikomiL))*1000000;
+  }
+
+double spchR(double warikomiR){
+    return (1/(2*warikomiR))*1000000;
+  }
+
+
+//割り込みスピード用変数
+int HzSPL=spchL(1000),HzSPR=spchR(1000);
+
+const float Kp=0.7;
+const int targetL=530;
+const int targetR=530;
+const int bias=0;
+
+int diffL=0,diffR=0;
+int outL=0,outR=0;
+
 ////////////////////////////////////////////////////////////////////////
 void timerPulse1() {
   //if(il>=ls){
@@ -125,73 +145,8 @@ float SpeedR(int rs){
   SR=ST*400;//1回転のスピード
   return SR/58; //タイヤの直径仮で60mm
   }
-
-void setup() {/////////////////////////////////////////////////////////////////////setup()/////////////////
-  //ｼﾘｱﾙ通信
-  Serial.begin(9600);
+void trace(){
   
-  pinMode(CLOCK_L,OUTPUT);
-  pinMode(CLOCK_R,OUTPUT);
-  pinMode(CWCCW_L,OUTPUT);
-  pinMode(CWCCW_R,OUTPUT);
-  pinMode(MOTOR_ONOFFL,OUTPUT);
-  pinMode(MOTOR_ONOFFR,OUTPUT);
-  pinMode(13,OUTPUT);//ﾓｰﾀｰﾄﾞﾗｲﾊﾞｰ用電源5V
-
-  pinMode(30,OUTPUT);
-  pinMode(32,OUTPUT);
-  pinMode(34,OUTPUT);
-  pinMode(38,OUTPUT);
-  pinMode(40,OUTPUT);//ｻｰﾎﾞﾓｰﾀｰﾋﾟﾝ  
-
-  pinMode(12,OUTPUT);//ブザーピン
-  
-  digitalWrite(CWCCW_L,HIGH); //回転方向//
-  digitalWrite(CWCCW_R,LOW);//回転方向//直進
-  
-  digitalWrite(MOTOR_ONOFFL,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
-  digitalWrite(MOTOR_ONOFFR,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
-  
-  digitalWrite(13,HIGH);//ﾓｰﾀｰﾄﾞﾗｲﾊﾞｰ用電源5V
-
-  AT=((1/(2*ppsL))*1000000);
- 
-  se(987,0.2);
-  se(1318,0.2);
-  
-  //Serial.print("buzer");
- // delay(500);///////////////////////////
-
-  digitalWrite(MOTOR_ONOFFL,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
-  digitalWrite(MOTOR_ONOFFR,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
-   
-     //ﾀｲﾏｰ割り込み設定
- Timer1.initialize(500);//ﾏｲｸﾛ秒単位で設定(500000us=0.5sで1秒に1ﾊﾟﾙｽ)
-  Timer1.attachInterrupt(timerPulse1);
-
- Timer3.initialize(500);
- Timer3.attachInterrupt(timerPulse2);
- 
-}//void setup END...
-double spchL(double warikomiL){
-    return (1/(2*warikomiL))*1000000;
-  }
-
-double spchR(double warikomiR){
-    return (1/(2*warikomiR))*1000000;
-  }
-
-//割り込みスピード用変数
-int HzSPL=spchL(1000),HzSPR=spchR(1000);
-
-const float Kp=0.7;
-const int targetL=530;
-const int targetR=530;
-const int bias=0;
-
-int diffL=0,diffR=0;
-int outL=0,outR=0;
-void loop() {
       Timer1.initialize(HzSPL);
       Timer3.initialize(HzSPR);
       
@@ -242,11 +197,6 @@ Serial.println(ppsL);
   Serial.print(600+outR);//オレンジ
   Serial.println();
 
-   
-
-   
-  
-
   if(S1>850&&S2>850){
    HzSPL=spchL(450);
    HzSPR=spchR(450);
@@ -256,4 +206,56 @@ Serial.println(ppsL);
    HzSPR=spchR(500);
     }//真ん中右のｾﾝｻｰが反応 右へ向ける
   */
+  
+  }
+void setup() {/////////////////////////////////////////////////////////////////////setup()/////////////////
+  //ｼﾘｱﾙ通信
+  Serial.begin(9600);
+  
+  pinMode(CLOCK_L,OUTPUT);
+  pinMode(CLOCK_R,OUTPUT);
+  pinMode(CWCCW_L,OUTPUT);
+  pinMode(CWCCW_R,OUTPUT);
+  pinMode(MOTOR_ONOFFL,OUTPUT);
+  pinMode(MOTOR_ONOFFR,OUTPUT);
+  pinMode(13,OUTPUT);//ﾓｰﾀｰﾄﾞﾗｲﾊﾞｰ用電源5V
+
+  pinMode(30,OUTPUT);
+  pinMode(32,OUTPUT);
+  pinMode(34,OUTPUT);
+  pinMode(38,OUTPUT);
+  pinMode(40,OUTPUT);//ｻｰﾎﾞﾓｰﾀｰﾋﾟﾝ  
+
+  pinMode(12,OUTPUT);//ブザーピン
+  
+  digitalWrite(CWCCW_L,HIGH); //回転方向//
+  digitalWrite(CWCCW_R,LOW);//回転方向//直進
+  
+  digitalWrite(MOTOR_ONOFFL,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
+  digitalWrite(MOTOR_ONOFFR,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
+  
+  digitalWrite(13,HIGH);//ﾓｰﾀｰﾄﾞﾗｲﾊﾞｰ用電源5V
+
+  AT=((1/(2*ppsL))*1000000);
+ 
+  se(987,0.2);
+  se(1318,0.2);
+  
+  //Serial.print("buzer");
+ // delay(500);///////////////////////////
+
+  digitalWrite(MOTOR_ONOFFL,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
+  digitalWrite(MOTOR_ONOFFR,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
+   
+     //ﾀｲﾏｰ割り込み設定
+ Timer1.initialize(500);//ﾏｲｸﾛ秒単位で設定(500000us=0.5sで1秒に1ﾊﾟﾙｽ)
+  Timer1.attachInterrupt(timerPulse1);
+
+ Timer3.initialize(500);
+ Timer3.attachInterrupt(timerPulse2);
+ 
+}//void setup END...
+
+void loop() {
+      trace();
  }//void 
