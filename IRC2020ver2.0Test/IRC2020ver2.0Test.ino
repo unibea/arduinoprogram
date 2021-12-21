@@ -17,7 +17,7 @@
 #define MRIGHT 2//真ん中右側のｾﾝｻｰを2番ﾋﾟﾝとする
 #define RIGHT  3//右側のｾﾝｻｰを3番ぴんとする
 
-int phase=3;//動作の段階
+int phase=0;//動作の段階
 
 //ﾄﾚｰｽｾﾝｻｰ用変数
 int S0=0;
@@ -637,7 +637,7 @@ void kaisyuu(){
       digitalWrite(CWCCW_R,HIGH);
       
       StepL=0;
-      delay(1000);
+      delay(500);
       Timer1.attachInterrupt(timerPulse1);
       Timer3.attachInterrupt(timerPulse2);
       while(1){
@@ -813,7 +813,8 @@ void loop() {
           //digitalWrite(MOTOR_ONOFFL,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
           //digitalWrite(MOTOR_ONOFFR,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
           delay(1000);//長時間停止　この時にシリアルプリントで値確認
-          count=0;         
+          count=0;
+          s=0,j=-500;         
           phase=colorcheck();     
           Serial.println("ここで色判定をしますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
           Serial.print("色判定結果");
@@ -829,8 +830,8 @@ void loop() {
             Serial.print("s=");
             Serial.println(s);
             s++;}
-          Serial.print("赤色が選択されました");
-          trace(0.7);
+          //Serial.print("赤色が選択されました");
+          trace(0.65);
           if(count==3){
             senkaiL(500,360);
             delay(100);
@@ -859,7 +860,7 @@ void loop() {
             se(659,1.5);
             count=0;
             s++;}
-            Serial.print("青色が選択されました");
+           // Serial.print("青色が選択されました");
           trace(0.5);//ゲインを下げる 
           if(count==1){
             senkaiL(500,720);
@@ -886,7 +887,6 @@ void loop() {
             //phase=9;
           break;
       case 8://黄色を認識した
-      
           while(s<1){
           se(349,0.2);
             se(440,0.2);
@@ -898,11 +898,11 @@ void loop() {
             se(440,0.2);
             se(523,0.2);
             s++;}
-          Serial.print("黄色が選択されました");
-          trace(0.7);
+          //Serial.print("黄色が選択されました");
+          trace(0.7s);
           if(count==2){
             senkaiL(500,360);
-            delay(1000);
+            delay(100);
             kousin(500,200);//落ちないか確認
             
             while(j<0){
@@ -915,7 +915,7 @@ void loop() {
            j++;
           }         
           Serial.print("黄色のボールを落としました。");
-            delay(1000);
+            delay(100);
              tyokusin(500,200);
              senkaiL(500,360);
              tyokusin(500,100);
