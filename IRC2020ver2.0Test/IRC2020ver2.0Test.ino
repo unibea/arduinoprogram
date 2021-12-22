@@ -327,13 +327,13 @@ void trace (float Kp){
   outL=Kp*diffL+bias;
   outR=Kp*diffR+bias;
 
-   HzSPL=spchL(450+outL);
-   HzSPR=spchR(450+outR);
+   HzSPL=spchL(400+outL);
+   HzSPR=spchR(400+outR);
 
 
   if(S1>850&&S2>850){
-   HzSPL=spchL(450);
-   HzSPR=spchR(450);
+   HzSPL=spchL(420);
+   HzSPR=spchR(420);
     }
     //何もなければ直進
       //ラインカウンタ
@@ -355,7 +355,7 @@ void trace (float Kp){
 
 //ここからｻｰﾎﾞﾓｰﾀｰ関数
 
-int i=-100;//ｻｰﾎﾞの出力時間調整変数
+int i=-50;//ｻｰﾎﾞの出力時間調整変数
 
 void servo3(int p){
   digitalWrite(38,HIGH); //digitalWrite(1,HIGH);
@@ -582,7 +582,7 @@ int j=-500;
       DFR=StepR;    
       break;
       }
-    if(StepL>710){
+    if(StepL>715){
       break;
       }
    }    
@@ -777,12 +777,12 @@ void loop() {
       break;
     case 2:
        // Serial.println("ボールのある場所まで移動しますよ〜〜〜〜〜〜〜〜〜〜〜");
-        trace(0.7);
+        trace(1.0);
         if(count==5){
-            Serial.println("if文の中ですよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
+            /*Serial.println("if文の中ですよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
             kousin(500,1000);
             tyokusin(500,800);
-            delay(750);
+            delay(750);*///後ろの壁当てをすると長距離走ることになりずれるため出来るだけライン上からはなれないようトレースして少し進み戻る。
             phase=3;
           }
        break;   
@@ -812,9 +812,9 @@ void loop() {
           //Serial.println(colorti);
           //digitalWrite(MOTOR_ONOFFL,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
           //digitalWrite(MOTOR_ONOFFR,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
-          delay(1000);//長時間停止　この時にシリアルプリントで値確認
+          delay(100);//長時間停止　この時にシリアルプリントで値確認
           count=0;
-          s=0,j=-500;         
+          s=0,j=-500,i=-50;         
           phase=colorcheck();     
           Serial.println("ここで色判定をしますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
           Serial.print("色判定結果");
@@ -831,7 +831,7 @@ void loop() {
             Serial.println(s);
             s++;}
           //Serial.print("赤色が選択されました");
-          trace(0.65);
+          trace(1.0);
           if(count==3){
             senkaiL(500,360);
             delay(100);
@@ -844,13 +844,19 @@ void loop() {
           while(j<0){
            servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
            j++;
-          }        
+          }
+       
+          while(i<0){
+              servo3(800);
+              i++;
+            }        
             delay(100);      
             tyokusin(500,200);
             delay(1);
             senkaiL(500,360);
             tyokusin(500,100);
             count=2;
+            phase=2;
             }
           
         break;
@@ -861,7 +867,7 @@ void loop() {
             count=0;
             s++;}
            // Serial.print("青色が選択されました");
-          trace(0.5);//ゲインを下げる 
+          trace(0.9);//ゲインを下げる 
           if(count==1){
             senkaiL(500,720);
             delay(100);
@@ -870,11 +876,11 @@ void loop() {
            servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
            j++;
           } 
-          j=0;
-          while(j<1000){
+          j=-100;
+          while(j<0){
            servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
            j++;
-          }i=-50;
+          }
           while(i<0){
           servo3(800);
           i++;
@@ -899,7 +905,7 @@ void loop() {
             se(523,0.2);
             s++;}
           //Serial.print("黄色が選択されました");
-          trace(0.7s);
+          trace(1.0);
           if(count==2){
             senkaiL(500,360);
             delay(100);
@@ -909,11 +915,15 @@ void loop() {
            servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
            j++;
           }
-          j=-300;
+          j=-100;
           while(j<0){
            servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
            j++;
-          }         
+          }
+          while(i<0){
+          servo3(800);
+          i++;
+          }            
           Serial.print("黄色のボールを落としました。");
             delay(100);
              tyokusin(500,200);
