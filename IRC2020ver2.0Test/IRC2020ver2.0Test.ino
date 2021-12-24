@@ -349,6 +349,34 @@ void trace (float Kp){
 
  }
 
+ 
+void tracet (float Kp){
+  Timer1.attachInterrupt(timerPulse1);
+  Timer3.attachInterrupt(timerPulse2);
+  Timer1.initialize(HzSPL);//R
+  Timer3.initialize(HzSPR);//L
+
+  S0=analogRead(LEFT);//0番ﾋﾟﾝ
+  S1=analogRead(MLEFT);//1番ﾋﾟﾝ
+  S2=analogRead(MRIGHT);//2番ﾋﾟﾝ
+  S3=analogRead(RIGHT);//3番ﾋﾟﾝ
+
+  diffL=targetL-S1;
+  diffR=targetR-S2;
+
+  outL=Kp*diffL+bias;
+  outR=Kp*diffR+bias;
+
+   HzSPL=spchL(350+outL);
+   HzSPR=spchR(350+outR);
+
+
+  if(S1>850&&S2>850){
+   HzSPL=spchL(350);
+   HzSPR=spchR(350);
+    }
+
+ }
 
  
   //・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・・改善ポイント
@@ -395,8 +423,8 @@ void senkaiR(int spl,int Step){
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
    delay(50);
-   Timer1.initialize(spchL(spl));
-   Timer3.initialize(spchR(spl)); 
+   Timer1.initialize(spchR(spl));
+   Timer3.initialize(spchL(spl)); 
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
    while(1){
@@ -425,8 +453,8 @@ int tyokusin(int spl,int Step)  {
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
    delay(50);
-   Timer1.initialize(spchL(spl));
-   Timer3.initialize(spchR(spl)); 
+   Timer1.initialize(spchR(spl));//右
+   Timer3.initialize(spchL(spl-10)); //左
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
    while(1){
@@ -456,8 +484,8 @@ int tyokusin(int spl,int Step)  {
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
    delay(50);
-   Timer1.initialize(spchL(500));
-   Timer3.initialize(spchR(500)); 
+   Timer1.initialize(spchR(500));
+   Timer3.initialize(spchL(500-10)); 
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
    while(1){
@@ -501,8 +529,8 @@ int kousin(int spl,int Step)  {
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
    delay(50);
-   Timer1.initialize(spchL(spl));
-   Timer3.initialize(spchR(spl)); 
+   Timer1.initialize(spchR(spl));
+   Timer3.initialize(spchL(spl-10)); 
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
    while(1){
@@ -532,8 +560,8 @@ int senkaiL(int spl,int Step){
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
    delay(50);
-   Timer1.initialize(spchL(spl));
-   Timer3.initialize(spchR(spl)); 
+   Timer1.initialize(spchR(spl));
+   Timer3.initialize(spchL(spl)); 
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
    while(1){
@@ -557,7 +585,7 @@ int j=-500;
 
 //探索
  int tansaku(){
-  senkaiL(500,360);
+  senkaiL(500,357);
    Timer1.detachInterrupt();
    Timer3.detachInterrupt();
    Serial.print('1');
@@ -569,8 +597,8 @@ int j=-500;
    delay(500);
    ls=10.0;
    rs=10.0;
-   Timer1.initialize(spchL(200));
-   Timer3.initialize(spchR(200));    
+   Timer1.initialize(spchR(200));
+   Timer3.initialize(spchL(200));    
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
    while(1){
@@ -598,16 +626,16 @@ int j=-500;
     }
     return 4;
   }
-  senkaiL(500,360);
-  tyokusin(500,100);
+  senkaiL(500,357);
+  tyokusin(300,100);
   return 3;
  }
  
 //回収
 void kaisyuu(){
      
-    Timer1.initialize(spchL(100));
-    Timer3.initialize(spchR(100));  
+    Timer1.initialize(spchR(100));
+    Timer3.initialize(spchL(100));  
     Timer1.detachInterrupt();
     Timer3.detachInterrupt();
     Serial.print("11");
@@ -761,28 +789,35 @@ void loop() {
         Serial.print("スタートしてとりあえず直進しますよ〜〜〜");
         Serial.println(count);
         tyokusinS();
-       // if(count==2){phase=1;}
+        //senkaiL(500,357);
+        if(count==2){phase=1;}
       break;
     case 1:
         Serial.println("ここで自由ボールを落としますよ〜");
-        senkaiR(500,360);//90度旋回
+        senkaiR(500,357);//90度旋回
         delay(500);
         kousin(500,300);
         delay(500);
         tyokusin(500,300);
         delay(500);
-        senkaiL(500,360);
+        senkaiL(500,357);
         delay(500);
         phase=2;
       break;
     case 2:
        // Serial.println("ボールのある場所まで移動しますよ〜〜〜〜〜〜〜〜〜〜〜");
         trace(1.0);
+        //StepL=0;
         if(count==5){
-            /*Serial.println("if文の中ですよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
-            kousin(500,1000);
-            tyokusin(500,800);
-            delay(750);*///後ろの壁当てをすると長距離走ることになりずれるため出来るだけライン上からはなれないようトレースして少し進み戻る。
+          kousin(450,950);
+          tyokusin(450,800);
+          /*
+          while(1){
+          tracet(1.0);
+          if(StepL==200){break;}       
+          }
+          kousin(350,100);*/
+           //後ろの壁当てをすると長距離走ることになりずれるため出来るだけライン上からはなれないようトレースして少し進み戻る。
             phase=3;
           }
        break;   
@@ -806,7 +841,7 @@ void loop() {
           delay(10);
           kousin(500,250);//もとは300
           delay(10);
-          senkaiL(500,360);//もとは360
+          senkaiL(500,357);//もとは360
           //delay(10);
           //colorti=colorcheck();
           //Serial.println(colorti);
@@ -833,7 +868,7 @@ void loop() {
           //Serial.print("赤色が選択されました");
           trace(1.0);
           if(count==3){
-            senkaiL(500,360);
+            senkaiL(500,357);
             delay(100);
             kousin(500,200);//落ちないか確認
             while(j<0){
@@ -853,7 +888,7 @@ void loop() {
             delay(100);      
             tyokusin(500,200);
             delay(1);
-            senkaiL(500,360);
+            senkaiL(500,357);
             tyokusin(500,100);
             count=2;
             phase=2;
@@ -869,7 +904,7 @@ void loop() {
            // Serial.print("青色が選択されました");
           trace(0.9);//ゲインを下げる 
           if(count==1){
-            senkaiL(500,720);
+            senkaiL(500,714);
             delay(100);
             kousin(500,500);//落ちないか確認
             while(j<0){
@@ -907,7 +942,7 @@ void loop() {
           //Serial.print("黄色が選択されました");
           trace(1.0);
           if(count==2){
-            senkaiL(500,360);
+            senkaiL(500,357);
             delay(100);
             kousin(500,200);//落ちないか確認
             
@@ -927,7 +962,7 @@ void loop() {
           Serial.print("黄色のボールを落としました。");
             delay(100);
              tyokusin(500,200);
-             senkaiL(500,360);
+             senkaiL(500,357);
              tyokusin(500,100);
              count=3;
              phase=2;     
