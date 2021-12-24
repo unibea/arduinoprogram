@@ -416,13 +416,13 @@ void senkaiR(int spl,int Step){
   Serial.print("右旋回");
    Timer1.detachInterrupt();
    Timer3.detachInterrupt();
-   delay(50);
+   //delay(50);
    digitalWrite(CWCCW_L,LOW);//回転方向変更
    digitalWrite(CWCCW_R,LOW);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(50);
+   //delay(50);
    Timer1.initialize(spchR(spl));
    Timer3.initialize(spchL(spl)); 
    Timer1.attachInterrupt(timerPulse1);
@@ -438,7 +438,7 @@ void senkaiR(int spl,int Step){
      Timer3.detachInterrupt(); 
      digitalWrite(CWCCW_L,HIGH);
      Serial.print('3');
-     delay(10); 
+     //delay(10); 
   }
  
   //直進
@@ -446,13 +446,13 @@ int tyokusin(int spl,int Step)  {
   Serial.print("直進");
     Timer1.detachInterrupt();
    Timer3.detachInterrupt();
-   delay(50);
+   //delay(50);
    digitalWrite(CWCCW_L,HIGH);//回転方向変更
    digitalWrite(CWCCW_R,LOW);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(50);
+   //delay(50);
    Timer1.initialize(spchR(spl));//右
    Timer3.initialize(spchL(spl-10)); //左
    Timer1.attachInterrupt(timerPulse1);
@@ -468,7 +468,7 @@ int tyokusin(int spl,int Step)  {
      Timer3.detachInterrupt();
 
      Serial.print('3');
-     delay(10); 
+     //delay(10); 
      
   }
 
@@ -477,13 +477,13 @@ int tyokusin(int spl,int Step)  {
   Serial.print("直進");
     Timer1.detachInterrupt();
    Timer3.detachInterrupt();
-   delay(50);
+   //delay(50);
    digitalWrite(CWCCW_L,HIGH);//回転方向変更
    digitalWrite(CWCCW_R,LOW);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(50);
+   //delay(50);
    Timer1.initialize(spchR(500));
    Timer3.initialize(spchL(500-10)); 
    Timer1.attachInterrupt(timerPulse1);
@@ -512,7 +512,7 @@ int tyokusin(int spl,int Step)  {
      Timer3.detachInterrupt();
 
      Serial.print('3');
-     delay(10); 
+     //delay(10); 
      
   }
 
@@ -522,13 +522,13 @@ int kousin(int spl,int Step)  {
   Serial.print("後進します");
    Timer1.detachInterrupt();
    Timer3.detachInterrupt();
-   delay(50);
+   //delay(50);
    digitalWrite(CWCCW_L,LOW);//回転方向変更
    digitalWrite(CWCCW_R,HIGH);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(50);
+   //delay(50);
    Timer1.initialize(spchR(spl));
    Timer3.initialize(spchL(spl-10)); 
    Timer1.attachInterrupt(timerPulse1);
@@ -545,7 +545,7 @@ int kousin(int spl,int Step)  {
      digitalWrite(CWCCW_L,HIGH);//回転方向変更
    digitalWrite(CWCCW_R,LOW);//回転方向変更 
      Serial.print('3');
-     delay(10); 
+     //delay(10); 
   }
   
   //旋回L
@@ -553,13 +553,13 @@ int senkaiL(int spl,int Step){
  Serial.print("左旋回");
    Timer1.detachInterrupt();
    Timer3.detachInterrupt();
-   delay(50);
+   //delay(50);
    digitalWrite(CWCCW_L,HIGH);//回転方向変更
    digitalWrite(CWCCW_R,HIGH);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(50);
+   //delay(50);
    Timer1.initialize(spchR(spl));
    Timer3.initialize(spchL(spl)); 
    Timer1.attachInterrupt(timerPulse1);
@@ -575,7 +575,7 @@ int senkaiL(int spl,int Step){
      Timer3.detachInterrupt(); 
      digitalWrite(CWCCW_R,LOW);
      Serial.print('3');
-     delay(10); 
+     //delay(10); 
 }
 
 int DFL=0;
@@ -589,12 +589,12 @@ int j=-500;
    Timer1.detachInterrupt();
    Timer3.detachInterrupt();
    Serial.print('1');
-   delay(50);
+   //delay(50);
    digitalWrite(CWCCW_L,LOW);//回転方向変更
    StepL=0;
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
-   delay(500);
+   //delay(500);
    ls=10.0;
    rs=10.0;
    Timer1.initialize(spchR(200));
@@ -639,7 +639,7 @@ void kaisyuu(){
     Timer1.detachInterrupt();
     Timer3.detachInterrupt();
     Serial.print("11");
-    delay(500);
+    //delay(500);
     ls=10.0;
     rs=10.0;
     StepL=0;
@@ -665,7 +665,7 @@ void kaisyuu(){
       digitalWrite(CWCCW_R,HIGH);
       
       StepL=0;
-      delay(500);
+      //delay(500);
       Timer1.attachInterrupt(timerPulse1);
       Timer3.attachInterrupt(timerPulse2);
       while(1){
@@ -678,7 +678,7 @@ void kaisyuu(){
         }
         Timer1.detachInterrupt();
         Timer3.detachInterrupt();
-        delay(1500);
+        //delay(1500);
    }
 
 //タイヤの速度計測関数
@@ -739,7 +739,7 @@ void setup() {//////////////////////////////////////////////////////////////////
   se(1318,0.2);
   
   Serial.print("buzer");
-  delay(500);///////////////////////////
+  //delay(500);///////////////////////////
 
   //事前作業
   while(i<0){
@@ -770,7 +770,7 @@ void setup() {//////////////////////////////////////////////////////////////////
   se(1318,0.4);
   se(1567,0.4);
   se(2093,0.4);
-  delay(500);///////////////////////////
+  //delay(500);///////////////////////////
   
   digitalWrite(MOTOR_ONOFFL,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
   digitalWrite(MOTOR_ONOFFR,LOW);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
@@ -795,13 +795,13 @@ void loop() {
     case 1:
         Serial.println("ここで自由ボールを落としますよ〜");
         senkaiR(500,357);//90度旋回
-        delay(500);
+        //delay(500);
         kousin(500,300);
-        delay(500);
+        //delay(500);
         tyokusin(500,300);
-        delay(500);
+        //delay(500);
         senkaiL(500,357);
-        delay(500);
+        //delay(500);
         phase=2;
       break;
     case 2:
@@ -834,20 +834,20 @@ void loop() {
           Serial.println("ボールを持ってゴールまで向かいますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
           Serial.println(DFL);
           senkaiR(500,740-DFL);//ズレすぎ？760
-          delay(10);
+          //delay(10);
           senkaiR(500,330);//変更点360で90度
-          delay(10);
+          //delay(10);
           tyokusin(500,2000);
-          delay(10);
+          //delay(10);
           kousin(500,250);//もとは300
-          delay(10);
+          //delay(10);
           senkaiL(500,357);//もとは360
           //delay(10);
           //colorti=colorcheck();
           //Serial.println(colorti);
           //digitalWrite(MOTOR_ONOFFL,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力 LOWで出力 HIGHで停止
           //digitalWrite(MOTOR_ONOFFR,HIGH);//ﾓｰﾀｰへのﾊﾟﾙｽ出力
-          delay(100);//長時間停止　この時にシリアルプリントで値確認
+          //delay(100);//長時間停止　この時にシリアルプリントで値確認
           count=0;
           s=0,j=-500,i=-50;         
           phase=colorcheck();     
@@ -869,7 +869,7 @@ void loop() {
           trace(1.0);
           if(count==3){
             senkaiL(500,357);
-            delay(100);
+            //delay(100);
             kousin(500,200);//落ちないか確認
             while(j<0){
            servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
@@ -885,9 +885,9 @@ void loop() {
               servo3(800);
               i++;
             }        
-            delay(100);      
+            //delay(100);      
             tyokusin(500,200);
-            delay(1);
+            //delay(1);
             senkaiL(500,357);
             tyokusin(500,100);
             count=2;
@@ -905,7 +905,7 @@ void loop() {
           trace(0.9);//ゲインを下げる 
           if(count==1){
             senkaiL(500,714);
-            delay(100);
+            //delay(100);
             kousin(500,500);//落ちないか確認
             while(j<0){
            servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
@@ -920,7 +920,7 @@ void loop() {
           servo3(800);
           i++;
           }       
-            delay(100);
+           // delay(100);
             tyokusin(500,580);
             count=4;
             phase=2;
@@ -943,7 +943,7 @@ void loop() {
           trace(1.0);
           if(count==2){
             senkaiL(500,357);
-            delay(100);
+           // delay(100);
             kousin(500,200);//落ちないか確認
             
             while(j<0){
@@ -960,7 +960,7 @@ void loop() {
           i++;
           }            
           Serial.print("黄色のボールを落としました。");
-            delay(100);
+            //delay(100);
              tyokusin(500,200);
              senkaiL(500,357);
              tyokusin(500,100);
