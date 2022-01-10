@@ -17,13 +17,15 @@
 #define MRIGHT 2//真ん中右側のｾﾝｻｰを2番ﾋﾟﾝとする
 #define RIGHT  3//右側のｾﾝｻｰを3番ぴんとする
 
-int phase=0;//動作の段階
+int phase=8;//動作の段階
 
 //ﾄﾚｰｽｾﾝｻｰ用変数
 int S0=0;
 int S1=0;
 int S2=0;
 int S3=0;
+
+float dst1=0,dst2=0;//前センサcm表示変数
 
 float a=0;
 
@@ -40,12 +42,14 @@ boolean outputr=LOW; //ﾊﾟﾙｽ用変数
 
 
 int Pulse1=0;
-int Pulse2=0;
+int Pulse2=0;//割り込み数
 
-int StepL=0;
+int StepL=0;//ステップ数：割り込み数２つで１つの凹凸
 int StepR=0;
 
- int rd=0;
+int rd=0;//ボール回収の際に進んだステップ数を記録する変数
+ 
+int GET=0;//ボールを回収した数（回収フェーズが作動した数）
 
 //ﾊﾟﾙｽ周波数=ｽﾃｯﾌﾟ速度(1秒間に何ｽﾃｯﾌﾟ)
 //500usそのままだった場合1秒間に1000ｽﾃｯﾌﾟ
@@ -341,6 +345,7 @@ void trace (float Kp){
           if(S3<500){
             count++;
             point=1;
+            se(900,0.2);
             }
        }
        if(S3>600){
@@ -348,7 +353,6 @@ void trace (float Kp){
         }
 
  }
-
  
 void tracet (float Kp){
   Timer1.attachInterrupt(timerPulse1);
@@ -498,6 +502,7 @@ int tyokusin(int spl,int Step)  {
           if(S0<500&&S3<500&&S1<500){
             count++;
             point=1;
+            se(900,0.2);
             }
        }
        if(S0>600&&S3>600){
@@ -602,22 +607,24 @@ int j=-500;
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
    while(1){
-    T0=analogRead(7);
+    dst1=5.0*analogRead(7)/1023;
+    dst2=26.549*pow(dst1,-1.2091);
+    if(dst2>100.00){dst2=100.00; }
     Serial.print('\t');
-    Serial.println(T0);////////////////なぜかｼﾘｱﾙﾌﾟﾘﾝﾄであたいを表示するとif文が機能する?
-    if(T0>550){
+    Serial.println(dst2);////////////////なぜかｼﾘｱﾙﾌﾟﾘﾝﾄであたいを表示するとif文が機能する?
+    if(dst2<20.0){
       DFL=StepL;
       DFR=StepR;    
       break;
       }
-    if(StepL>715){
+    if(StepL>727){
       break;
       }
    }    
      Timer1.detachInterrupt();
      Timer3.detachInterrupt();
      digitalWrite(CWCCW_L,HIGH);
-     if(T0>550){ 
+     if(dst2<20.0){ 
       //DFL=StepL;
       //DFR=StepR;
      for(int i=0;i<80;i++){
@@ -633,7 +640,7 @@ int j=-500;
  
 //回収
 void kaisyuu(){
-     
+     int ST=0,Flag=0;
     Timer1.initialize(spchR(100));
     Timer3.initialize(spchL(100));  
     Timer1.detachInterrupt();
@@ -647,7 +654,7 @@ void kaisyuu(){
     Timer1.attachInterrupt(timerPulse1);
     Timer3.attachInterrupt(timerPulse2);
     
-    for(int i=-1000;i<0;i++){
+    while(1){
        servoloopL();       
        servoloopR();
       T0=analogRead(7);
@@ -658,8 +665,14 @@ void kaisyuu(){
       if(300<T0&&T0<450){
         Timer1.detachInterrupt();
         Timer3.detachInterrupt();
+        Flag=1;
         rd=StepL;
-        } 
+        }
+       if(Flag==1){
+          ST++;
+          }
+       if(ST>1000){break;}   
+        
       }
       digitalWrite(CWCCW_L,LOW);
       digitalWrite(CWCCW_R,HIGH);
@@ -672,12 +685,13 @@ void kaisyuu(){
         Serial.print(StepL);
         Serial.print(" ");
         Serial.println(rd);
-        if(rd<StepL){//これでバックすることが可能に？////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if(rd-15<StepL){//これでバックすることが可能に？////////////////////////////////////////////////////////////////////////////////////////////////////////
           break;
           }  
         }
         Timer1.detachInterrupt();
         Timer3.detachInterrupt();
+        GET++;
         //delay(1500);
    }
 
@@ -790,33 +804,33 @@ void loop() {
         Serial.println(count);
         tyokusinS();
         //senkaiL(500,357);
-        if(count==2){phase=1;}
+        if(count==2){ phase=1; }
       break;
     case 1:
         Serial.println("ここで自由ボールを落としますよ〜");
-        senkaiR(500,357);//90度旋回
+        senkaiR(500,370);//90度旋回
         //delay(500);
         kousin(500,300);
         //delay(500);
         tyokusin(500,300);
         //delay(500);
-        senkaiL(500,357);
+        senkaiL(500,370);
         //delay(500);
         phase=2;
       break;
     case 2:
        // Serial.println("ボールのある場所まで移動しますよ〜〜〜〜〜〜〜〜〜〜〜");
         trace(1.0);
-        //StepL=0;
+        StepL=0;
         if(count==5){
-          kousin(450,950);
-          tyokusin(450,800);
-          /*
           while(1){
           tracet(1.0);
-          if(StepL==200){break;}       
+          if(GET<=4&&StepL==400){Serial.println("GET1");break;}
+          if(GET>=5&&GET<=8&&StepL==800){Serial.println("GET2");break;}
+          if(GET>=9&&GET<=12&&StepL==1200){Serial.print("GET3");break;}
+          if(GET>=13&&StepL==1600){Serial.print("GET4");break;}       
           }
-          kousin(350,100);*/
+          kousin(350,350);
            //後ろの壁当てをすると長距離走ることになりずれるため出来るだけライン上からはなれないようトレースして少し進み戻る。
             phase=3;
           }
@@ -833,15 +847,15 @@ void loop() {
      case 5:
           Serial.println("ボールを持ってゴールまで向かいますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
           Serial.println(DFL);
-          senkaiR(500,740-DFL);//ズレすぎ？760
+          senkaiR(500,727-DFL);//ズレすぎ？760
           //delay(10);
           senkaiR(500,330);//変更点360で90度
           //delay(10);
-          tyokusin(500,2000);
+          //tyokusin(500,2000);
           //delay(10);
-          kousin(500,250);//もとは300
+          //kousin(500,250);//もとは300
           //delay(10);
-          senkaiL(500,357);//もとは360
+          //senkaiL(500,357);//もとは360
           //delay(10);
           //colorti=colorcheck();
           //Serial.println(colorti);
@@ -867,7 +881,7 @@ void loop() {
             s++;}
           //Serial.print("赤色が選択されました");
           trace(1.0);
-          if(count==3){
+          if(count==4){
             senkaiL(500,357);
             //delay(100);
             kousin(500,200);//落ちないか確認
@@ -903,7 +917,7 @@ void loop() {
             s++;}
            // Serial.print("青色が選択されました");
           trace(0.9);//ゲインを下げる 
-          if(count==1){
+          if(count==2){
             senkaiL(500,714);
             //delay(100);
             kousin(500,500);//落ちないか確認
@@ -941,7 +955,7 @@ void loop() {
             s++;}
           //Serial.print("黄色が選択されました");
           trace(1.0);
-          if(count==2){
+          if(count==1){//変更点111
             senkaiL(500,357);
            // delay(100);
             kousin(500,200);//落ちないか確認
@@ -961,7 +975,7 @@ void loop() {
           }            
           Serial.print("黄色のボールを落としました。");
             //delay(100);
-             tyokusin(500,200);
+             tyokusin(500,180);
              senkaiL(500,357);
              tyokusin(500,100);
              count=3;

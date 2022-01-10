@@ -1,7 +1,8 @@
 int S0=0;
 int S1=0;
 int S2=0;
-int S3=0;
+int S3=0,S9=0;
+float dst1,dst2;
 
 void setup() {
   Serial.begin(9600);
@@ -14,19 +15,16 @@ void loop() {
   S1=analogRead(1);
   S2=analogRead(2);
   S3=analogRead(7);//一番左
- 
- Serial.println(S0);
-  /*Serial.print("\t");
-  Serial.print(S1);
-  Serial.print("\t");
-  Serial.print(S2);
-  Serial.print("\t");
-  Serial.print(S3);
-  Serial.println("\t");
-  
-*/
 
- 
+ //0~1023
+ dst1=5.0*analogRead(7)/1023;
+ dst2=26.549*pow(dst1,-1.2091);
+ if(dst2>100.00){dst2=100.00;}
+  Serial.print("\t");
+  Serial.print("\t");
+  Serial.print(dst2);
+  Serial.println("\t");
+   
 
 }
  
