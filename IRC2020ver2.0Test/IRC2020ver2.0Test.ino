@@ -148,7 +148,7 @@ int color_judgement(){
   //取得できた色のベクトルと黄ベクトルとの距離を調べる
   Y_to_getColor = sqrt( (Y_vec[0] - get_vec[0]) * (Y_vec[0] - get_vec[0])
                        +(Y_vec[1] - get_vec[1]) * (Y_vec[1] - get_vec[1])
-                       +(Y_vec[2] - get_vec[2]) * (Y_vec[2] - get_vec[2]) );
+                       +(Y_vec[2] - get_vec[2]) * (Y_vec[2] - get_vec[2]) )+1500;
   
   /*
     ベクトルの距離を比較し，一番大きいベクトルを示す数値を変数に格納する
@@ -488,7 +488,7 @@ int tyokusin(int spl,int Step)  {
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
    //delay(50);
-   Timer3.initialize(spchL(500-10)); 
+   Timer1.initialize(spchR(600));
    Timer3.initialize(spchL(600-10)); 
    Timer1.attachInterrupt(timerPulse1);
    Timer3.attachInterrupt(timerPulse2);
