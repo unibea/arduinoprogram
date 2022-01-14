@@ -85,8 +85,17 @@ void loop(){ //測光時間用の可変抵抗器の読み込み（アナログ�
   //Gate端子をHighに戻す  
   digitalWrite(GATE,HIGH);
 
-}
+  if(Serial.available()>0){
+    Serial.print(red,DEC);
+    Serial.print(",");
+    Serial.print(green,DEC);
+    Serial.print(",");
+    Serial.println(blue,DEC);
+    Serial.read();
+  }
 
+}
+ 
 //12ビット分のパルス送信と読み込み処理
 int shiftIn(){
   int result=0;   //検出結果用の変数を用意（0：初期化）
@@ -128,7 +137,7 @@ void color_judgement(void){
   //取得できた色のベクトルと黄ベクトルとの距離を調べる
   Y_to_getColor = sqrt( (Y_vec[0] - get_vec[0]) * (Y_vec[0] - get_vec[0])
                        +(Y_vec[1] - get_vec[1]) * (Y_vec[1] - get_vec[1])
-                       +(Y_vec[2] - get_vec[2]) * (Y_vec[2] - get_vec[2]) );
+                       +(Y_vec[2] - get_vec[2]) * (Y_vec[2] - get_vec[2]) )+1500;
   
   /*
     ベクトルの距離を比較し，一番大きいベクトルを示す数値を変数に格納する
