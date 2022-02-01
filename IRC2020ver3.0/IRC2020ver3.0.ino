@@ -146,7 +146,7 @@ int senkaiL();
 int DFL=0;//探索時の旋回量記録変数
 
 
-int d=0,s=0,Frag=0;//Frag回数指定フラグ
+int d=0,s=0,Frag=0,ball=0;//Frag回数指定フラグ
 //距離センサ距離の変数
 float kyori=0;
 
@@ -198,6 +198,13 @@ void setup() {//////////////////////////////////////////////////////////////////
   //事前作業
   while(i<0){
     servo1(1000);//1150
+    i++;
+  }//後方ｻｰﾎﾞﾃｽﾄと初期位置の出力
+
+  i=-80;//時間調整変数初期化
+  
+  while(i<0){
+    servo2(1000);//値が正確ではないので調整する///////////////////////////////////////////////////////////////////////////////////////
     i++;
   }//後方ｻｰﾎﾞﾃｽﾄと初期位置の出力
   
@@ -275,29 +282,44 @@ void loop() {
          Serial.println("ボールを回収しますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
          kaisyuu();
          Frag=0;
+         ball++;
          phase=5;
        break;
      case 5:
           Serial.println("ボールを持ってゴールまで向かいますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
           Serial.println(DFL);
-          while(1){
-            Serial.print("そのまま");
-            senkaiR(500,727-DFL);//ズレすぎ？760
-            if(GET==3||GET==6||GET==9||GET==12||GET==15||kyori>15.0){break;}
-            senkaiR(500,360);//変更点360で90度
-            Frag=1;
+          
+          switch(ball){
+            case 1:
+              if(GET==3||GET==6||GET==9||GET==12||GET==15||kyori>15.0){
+                senkaiR(500,727-DFL);//右に直角になる
+                kousin(500,1100);
+                tyokusin(500,785);
+                senkaiL(500,360);
+                servo2(800);//真ん中のサーボを閉める（値は仮）
+                phase=3;//２個目の探索へ
+                }else{
+                  senkaiR(500,360-DFL);
+                  servo2(800);//真ん中のサーボを閉める(値は仮)
+                  phase=3;//２個目の探索へ
+                  }
             break;
-          }
-          while(1){
-            Serial.print("壁当て");
-            if(Frag==1){break;}
-            kousin(500,1100);
-            tyokusin(500,785);
-            senkaiR(500,360);
+            case 2:
+              if(GET==3||GET==6||GET==9||GET==12||GET==15||kyori>15.0){
+                senkaiR(500,727-DFL);//右に直角になる
+                kousin(500,1100);
+                tyokusin(500,785);
+                senkaiR(500,360);
+                kousin(500,100);
+                }else{
+                  senkaiR(500,727-DFL);
+                  senkaiR(500,360);
+                  kousin(500,100);
+                  }
             break;
-          }
-          kousin(500,100);
-          count=0;
+            }
+          if(ball==1){break;}  
+          count=0,ball=0;
           s=0,j=-100,i=-50;         
           phase=colorcheck();     
           Serial.println("ここで色判定をしますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
