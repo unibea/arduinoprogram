@@ -1,3 +1,4 @@
+
 void timerPulse1() {
     digitalWrite(CLOCK_R,outputr);
     outputr = !outputr;
@@ -17,8 +18,7 @@ void timerPulse2() {
         Pulse1=0;
       }
 }
-
-
+//カラーセンサー関数
 int shiftIn(){
   int result=0;   //検出結果用の変数を用意（0：初期化）
   Serial.print("shiftIn開始");
@@ -166,6 +166,7 @@ int  colorcheck(){
     return color;
  }
 
+//ブザー関数
  void se(double noteNum, double len){
   int ms;
   double f,temp;
@@ -189,7 +190,7 @@ int  colorcheck(){
   }
   
 }
-
+//P制御　トレース関数
 void trace (float Kp){
   Timer1.attachInterrupt(timerPulse1);
   Timer3.attachInterrupt(timerPulse2);
@@ -271,13 +272,20 @@ void tracet (float Kp){
     }
 
  }
-
+//サーボ関数
   void servo3(int p){
   digitalWrite(38,HIGH); //digitalWrite(1,HIGH);
   delayMicroseconds(p); 
   digitalWrite(38,LOW); //digitalWrite(1,LOW);
   delayMicroseconds(20000-p);
   }//固定ｻｰﾎﾞ一番前
+
+  void servo2(int p){
+  digitalWrite(40,HIGH); //digitalWrite(1,HIGH);
+  delayMicroseconds(p); 
+  digitalWrite(40,LOW); //digitalWrite(1,LOW);//サーボのピン番号確認
+  delayMicroseconds(20000-p);
+  }//固定ｻｰﾎﾞ真ん中
 
   void servo1(int s){
   digitalWrite(32,HIGH); //digitalWrite(1,HIGH);
@@ -410,7 +418,7 @@ int kousin(int spl,int Step)  {
      //delay(10); 
   }
   
-  //旋回L
+  //旋回L　左旋回
 int senkaiL(int spl,int Step){
  Serial.print("左旋回");
    Timer1.detachInterrupt();
@@ -440,7 +448,7 @@ int senkaiL(int spl,int Step){
      //delay(10); 
 }
 
-//旋回R
+//旋回R　右旋回
 void senkaiR(int spl,int Step){
   Serial.print("右旋回");
    Timer1.detachInterrupt();
