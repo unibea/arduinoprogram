@@ -50,7 +50,7 @@ void loop(){
       if(i==1){break;}
       }
     }*/
-//lemon();
+lemon();
   
   /*tone(buzzerb,277,500);//ド#
   delay(1000);
