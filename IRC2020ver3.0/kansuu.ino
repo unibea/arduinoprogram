@@ -87,12 +87,28 @@ int color_judgement(){
   switch(judge_color) {
   case 6:
     Serial.println("Red");
+    se(277,0.5);
+    se(330,0.5);
+    se(370,0.5);
+    se(330,0.5);
+    se(440,0.5);
     break;
   case 7:
     Serial.println("Blue");
+    se(783,1.0);
+    se(659,1.5);
     break;
   case 8:
     Serial.println("yellow");
+    se(349,0.2);
+    se(440,0.2);
+    se(523,0.2);
+    se(349,0.2);
+    se(440,0.2);
+    se(523,0.2);
+    se(349,0.2);
+    se(440,0.2);
+    se(523,0.2);        
     break;
   }
   return judge_color;//6番なら赤7番なら青8番なら黄色
@@ -197,19 +213,17 @@ void trace (float Kp){
   Timer1.initialize(HzSPL);//R
   Timer3.initialize(HzSPR);//L
   
-/* 1ｽﾃｯﾌﾟで0.6535mm進む
+ //1ｽﾃｯﾌﾟで0.6535mm進む
   Serial.print(S0);
   Serial.print("\t");
   Serial.print(S1);
   Serial.print("\t");
-  Serial.print(S2);
+  Serial.print(S3);
   Serial.print("\t");
-  Serial.print(diffR);
-  Serial.print("\t");
-  Serial.print(diffL);
+  Serial.print(count);
   Serial.print("\t");
   Serial.println();
-*/
+
 
   S0=analogRead(LEFT);//0番ﾋﾟﾝ
   S1=analogRead(MLEFT);//1番ﾋﾟﾝ
@@ -233,11 +247,15 @@ void trace (float Kp){
     //何もなければ直進
       //ラインカウンタ
       if(point==0){
-          if(S3<500){
+          if(S3<500&&Sfrag==0){
             count++;
             point=1;
             se(900,0.2);
-            }
+            }else if(S3<500&&Sfrag==1){
+              count--;
+            point=1;
+            se(900,0.2);
+              }
        }
        if(S3>600){
         point=0;
@@ -598,3 +616,38 @@ void kaisyuu(){
         GET++;
         //delay(1500);
    }
+ //ボール排出
+ void OUT(){
+  while(j<0){
+              servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
+              j++;
+            }
+            kousin(500,200);//落ちないか確認
+            tyokusin(500,185);
+            j=-100;
+          while(j<0){
+            servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
+            j++;
+            }
+          while(i<0){
+            servo3(800);
+            i++;
+            }//前サーボ開く
+  }
+ void OUTL(){
+  while(j<0){
+              servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
+              j++;
+            }
+            kousin(500,550);//落ちないか確認
+            tyokusin(500,580);
+            j=-100;
+          while(j<0){
+            servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
+            j++;
+            }
+          while(i<0){
+            servo3(800);
+            i++;
+            }//前サーボ開く
+  }   

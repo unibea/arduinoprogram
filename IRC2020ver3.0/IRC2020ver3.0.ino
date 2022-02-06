@@ -93,6 +93,10 @@ double Y_to_getColor;
 const int signal = 12;//buzzer
 
 int sen=5;
+int AKA=4,AO=2,KI=3;
+
+int Sfrag=0;//進行方向フラグ　０：進む　１：戻る
+
 
 ////////////////////////////////////////////////////////////////////////
 void timerPulse1();//pt宣言
@@ -149,7 +153,8 @@ int DFL=0;//探索時の旋回量記録変数
 int d=0,s=0,Frag=0,ball=0;//Frag回数指定フラグ
 //距離センサ距離の変数
 float kyori=0;
-
+int iro=0,kakoiro=0;//色の値　６：赤　７：青　８：黄色//過去の色の値
+int DX=0;//countを変更するための変数。
 //ｻｰﾎﾞの出力時間調整変数
 int i=-50;
 int j=-100;
@@ -204,7 +209,7 @@ void setup() {//////////////////////////////////////////////////////////////////
   i=-80;//時間調整変数初期化
   
   while(i<0){
-    servo2(1000);//値が正確ではないので調整する///////////////////////////////////////////////////////////////////////////////////////
+    servo2(1300);//値が正確ではないので調整する///////////////////////////////////////////////////////////////////////////////////////
     i++;
   }//後方ｻｰﾎﾞﾃｽﾄと初期位置の出力
   
@@ -242,7 +247,6 @@ void loop() {
   switch(phase){
     case 0:
         Serial.print("スタート");
-        Serial.println(count);
         tyokusinS();
         // senkaiL(500,357);//90度旋回試験用
         if(count==2){phase=1;}
@@ -296,11 +300,30 @@ void loop() {
                 kousin(500,1100);
                 tyokusin(500,785);
                 senkaiL(500,360);
-                servo2(800);//真ん中のサーボを閉める（値は仮）
+                i=-80;
+                while(i<0){
+                  servo2(820);
+                  i++;
+                }
+                i=-80;
+                while(i<0){
+                  servo3(800);
+                  i++;
+                }                
                 phase=3;//２個目の探索へ
                 }else{
                   senkaiR(500,360-DFL);
-                  servo2(800);//真ん中のサーボを閉める(値は仮)
+                  kousin(500,100);
+                  i=-80;
+                while(i<0){
+                  servo2(820);
+                  i++;
+                }
+                i=-80;
+                while(i<0){
+                  servo3(800);
+                  i++;
+                } 
                   phase=3;//２個目の探索へ
                   }
             break;
@@ -311,134 +334,102 @@ void loop() {
                 tyokusin(500,785);
                 senkaiR(500,360);
                 kousin(500,100);
+                Sfrag=1;//進行方向変更
                 }else{
                   senkaiR(500,727-DFL);
                   senkaiR(500,360);
                   kousin(500,100);
+                  Sfrag=1;//進行方向変更
                   }
             break;
             }
           if(ball==1){break;}  
-          count=0,ball=0;
           s=0,j=-100,i=-50;         
-          phase=colorcheck();     
-          Serial.println("ここで色判定をしますよ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜");
+          iro=colorcheck();
           Serial.print("色判定結果");
-          Serial.println(phase);//６：赤色、７：青色、８：黄色
+          Serial.println(iro);//６：赤色、７：青色、８：黄色
+          while(1){
+            trace(1.0);
+            if(iro==6&&count==1){ 
+              senkaiL(500,372);
+              break;}//赤色
+            if(iro==7&&count==3){
+              senkaiL(500,720);
+              break;}//青色
+            if(iro==8&&count==2){
+              senkaiL(500,372);
+              break;}//黄色
+            } 
+          phase=6;//Next phase             
        break;
-      case 6://赤を認識した場合
-          while(s<1){
-            se(277,0.5);
-            se(330,0.5);
-            se(370,0.5);
-            se(330,0.5);
-            se(440,0.5);
-            Serial.print("s=");
-            Serial.println(s);
-            s++;
-            }
-          //Serial.print("赤色が選択されました");
-          trace(1.0);
-          if(count==4){
-            senkaiL(500,372);
-            //delay(100);
-            //kousin(500,200);//落ちないか確認
-          while(j<0){
-              servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
-              j++;
-            }
-            kousin(500,200);//落ちないか確認
-            tyokusin(500,185);
-            j=-100;
-          while(j<0){
-            servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
-            j++;
-            }
-          while(i<0){
-            servo3(800);
-            i++;
-            }        
-
+      case 6://１個目赤を認識した場合
+          switch(iro){
+            case 6://赤                                 
+            OUT();  
+            ball--; 
+             if(ball==0){    
             senkaiL(500,372);
             tyokusin(500,100);
             count=2;
             phase=2;
-          }
+            break;     
+             }
+             i=-80;//時間調整変数初期化
+            while(i<0){
+              servo2(1300);
+              i++;
+            }
+             phase=9;    
+            break;
           
-        break;
-      case 7://青を認識した
-            while(s<1){
-            se(783,1.0);
-            se(659,1.5);
-            count=0;
-            s++;}
-          trace(0.9);//ゲインを下げる 
-          if(count==2){
-            senkaiL(500,720);
-            //delay(100);           
-            while(j<0){
-           servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
-           j++;
-          }
-           kousin(500,550);//落ちないか確認 
-           tyokusin(500,580);
-          j=-100;
-          while(j<0){
-           servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
-           j++;
-          }
-          while(i<0){
-          servo3(800);
-          i++;
-          }       
-           // delay(100);           
+            case 7://青                    
+          
+            OUTL();
+             ball--;
+             if(ball==0){        
             count=4;
             phase=2;
-              }      
-            //phase=9;
-          break;
-      case 8://黄色を認識した
-          while(s<1){
-          se(349,0.2);
-            se(440,0.2);
-            se(523,0.2);
-            se(349,0.2);
-            se(440,0.2);
-            se(523,0.2);
-            se(349,0.2);
-            se(440,0.2);
-            se(523,0.2);
-            s++;}
-          //Serial.print("黄色が選択されました");
-          trace(1.0);
-          if(count==3){//変更点111
-            senkaiL(500,372);
-           // delay(100);
-            //kousin(500,200);//落ちないか確認
-            
-            while(j<0){
-           servo1(1600);////////servo1(1600)で開く//////////////////////////////////////////////////////////////////////////////
-           j++;
-          }
-           kousin(500,200);//落ちないか確認
-           tyokusin(500,183);
-          j=-100;
-          while(j<0){
-           servo1(1000);////////servo1(1150)で閉じる//////////////////////////////////////////////////////////////////////////////
-           j++;
-          }
-          while(i<0){
-          servo3(800);
-          i++;
-          }            
-          Serial.print("黄色のボールを落としました。");
-            //delay(100);
+            break;
+             }
              
+             i=-80;//時間調整変数初期化
+            while(i<0){
+              servo2(1300);
+              i++;
+            }
+            
+             phase=9;
+            break;
+          
+            case 8://黄色            
+            OUT();
+            ball--;
+             if(ball==0){    
              senkaiL(500,372);
              tyokusin(500,100);
              count=3;
-             phase=2;     
-            }          
-          break;  
-  }                       
+             phase=2;
+             break;     
+             }
+             
+             i=-80;//時間調整変数初期化
+            while(i<0){
+              servo2(1300);
+              i++;
+            }
+             phase=9;
+            break;
+          }
+      case 9:
+      kakoiro=iro;//１個目の色を保存
+      s=0,j=-100,i=-50;         
+          iro=colorcheck();
+          Serial.print("色判定結果");
+          Serial.println(iro);//６：赤色、７：青色、８：黄色
+          
+      break;
+                   
+        break;        
+                       
  }//void 
+}
