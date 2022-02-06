@@ -650,4 +650,53 @@ void kaisyuu(){
             servo3(800);
             i++;
             }//前サーボ開く
-  }   
+  } 
+ void sortb(){
+    senkaiL(500,372);
+    Sfrag=0;//カウント進む
+    tyokusin(500,100);
+    while(1){
+      trace(1.0);
+      if(count==3){
+        phase=6;
+        }
+     }
+  }
+ void sortg(int DX){
+      senkaiL(500,720);
+      Sfrag=1;//カウント戻る
+      tyokusin(500,100);
+      while(1){
+        trace(1.0);
+        if(count==DX){
+          senkaiL(500,372);
+          phase=6;
+          }
+        }
+  }
+ void sortRY(){
+    senkaiL(500,372);
+    Sfrag=0;//カウント進む
+    tyokusin(500,100);
+    while(1){
+        trace(1.0);
+        if(count==2){
+          senkaiR(500,372);
+          phase=6;
+          }
+      }
+  }
+
+ void sortYR(){
+    senkaiR(500,372);
+    Sfrag=1;//カウント戻る
+    tyokusin(500,100);
+    while(1){
+        trace(1.0);
+        if(count==1){
+          senkaiL(500,372);
+          phase=6;
+          }
+      }
+  }  
+       

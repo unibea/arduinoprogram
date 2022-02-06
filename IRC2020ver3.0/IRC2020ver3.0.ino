@@ -24,16 +24,6 @@
 
 
 int phase=0;//動作の段階
-/* case 0:スタート直後からコース１本目の線まで直進
-   case 1:90度旋回して自由ボールを落とす
-   case 2:P制御で進みつつ回収場所まで進んだら位置調整を行う
-   case 3:ボール探索を行う（ボールを発見したらサーボを上げるまで）
-   case 4:ボール回収を行う（ボールを回収し進んだ分だけ戻る部分まで）
-   case 5:(回転してor壁当てしてから回転)して後ろを向きボールの色認識を行う。
-   case 6:赤色のゴールにボールを運びcount値をリセットしてcase2に戻る
-   case 7:青色のゴールにボールを運びcount値をリセットしてcase2に戻る
-   case 8:黄色のゴールにボールを運びcount値をリセットしてcase2に戻る
-   */
 
 //ﾄﾚｰｽｾﾝｻｰ用変数
 int S0=0;
@@ -339,7 +329,7 @@ void loop() {
                   senkaiR(500,727-DFL);
                   senkaiR(500,360);
                   kousin(500,100);
-                  Sfrag=1;//進行方向変更
+                  Sfrag=1;//進行方向戻る
                   }
             break;
             }
@@ -365,30 +355,30 @@ void loop() {
       case 6://１個目赤を認識した場合
           switch(iro){
             case 6://赤                                 
-            OUT();  
-            ball--; 
+             OUT();  
+             ball--; 
              if(ball==0){    
-            senkaiL(500,372);
-            tyokusin(500,100);
-            count=2;
-            phase=2;
+             senkaiL(500,372);
+             tyokusin(500,100);
+             count=2;
+             phase=2;
             break;     
              }
              i=-80;//時間調整変数初期化
-            while(i<0){
+             while(i<0){
               servo2(1300);
               i++;
-            }
-             phase=9;    
+             }
+             phase=7;    
             break;
           
             case 7://青                    
           
-            OUTL();
+             OUTL();
              ball--;
              if(ball==0){        
-            count=4;
-            phase=2;
+             count=4;
+             phase=2;
             break;
              }
              
@@ -396,20 +386,20 @@ void loop() {
             while(i<0){
               servo2(1300);
               i++;
-            }
+             }
             
-             phase=9;
+             phase=7;
             break;
           
             case 8://黄色            
-            OUT();
-            ball--;
+             OUT();
+             ball--;
              if(ball==0){    
              senkaiL(500,372);
              tyokusin(500,100);
              count=3;
              phase=2;
-             break;     
+            break;     
              }
              
              i=-80;//時間調整変数初期化
@@ -417,16 +407,25 @@ void loop() {
               servo2(1300);
               i++;
             }
-             phase=9;
+             phase=7;
             break;
           }
-      case 9:
-      kakoiro=iro;//１個目の色を保存
-      s=0,j=-100,i=-50;         
+      case 7:
+       kakoiro=iro;//１個目の色を保存
+       s=0,j=-100,i=-50;         
           iro=colorcheck();
           Serial.print("色判定結果");
           Serial.println(iro);//６：赤色、７：青色、８：黄色
+          if(iro==kakoiro){phase=6;}//同じ色の場合
           
+          if(iro==7&&(kakoiro==6||kakoiro==8)){sortb();}//黄色、赤色⇨青色
+          
+          if(iro==6&&kakoiro==7){sortg(1.0);}//青色⇨赤色
+          if(iro==8&&kakoiro==7){sortg(2.0);}//青色⇨黄色
+
+          if(iro==8&&kakoiro==6){sortRY();}//赤色⇨黄色
+          if(iro==6&&kakoiro==8){sortYR();}//黄色⇨赤色
+
       break;
                    
         break;        
