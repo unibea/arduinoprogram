@@ -212,14 +212,14 @@ void trace (float Kp){
   Timer3.attachInterrupt(timerPulse2);
   Timer1.initialize(HzSPL);//R
   Timer3.initialize(HzSPR);//L
-  
+ /* 
  //1ｽﾃｯﾌﾟで0.6535mm進む
   Serial.print(S0);
   Serial.print("\t");
   Serial.print(S1);
   Serial.print("\t");
   Serial.print(S3);
-  Serial.print("\t");
+  Serial.print("\t");*/
   Serial.print(count);
   Serial.print("\t");
   Serial.println();
@@ -509,8 +509,8 @@ void senkaiR(int spl,int Step){
    StepR=0;//ｽﾃｯﾌﾟ数ﾘｾｯﾄ
    Serial.print('2');
    //delay(500);
-   ls=10.0;
-   rs=10.0;
+   //ls=10.0;
+   //rs=10.0;
    Timer1.initialize(spchR(200));
    Timer3.initialize(spchL(200));    
    Timer1.attachInterrupt(timerPulse1);
@@ -519,7 +519,7 @@ void senkaiR(int spl,int Step){
     Flag++;
     dst1=5.0*analogRead(7)/1023;
     dst2=26.549*pow(dst1,-1.2091);
-    if(dst2>100.00){dst2=100.00; }
+    if(dst2>100.00){dst2=100.00; }//距離センサのcmに変換
     Serial.print('\t');
     Serial.print(dst2);////////////////なぜかｼﾘｱﾙﾌﾟﾘﾝﾄであたいを表示するとif文が機能する?
    /* Serial.print('\t');
@@ -569,13 +569,12 @@ void kaisyuu(){
     Timer3.detachInterrupt();
     Serial.print("11");
     //delay(500);
-    ls=10.0;
-    rs=10.0;
+    //ls=10.0;
+    //rs=10.0;
     StepL=0;
     StepR=0;
     Timer1.attachInterrupt(timerPulse1);
-    Timer3.attachInterrupt(timerPulse2);
-    
+    Timer3.attachInterrupt(timerPulse2);    
     while(1){
        servoloopL();       
        servoloopR();
@@ -593,11 +592,15 @@ void kaisyuu(){
        if(Flag==1){
           ST++;
           }
-       if(ST>1000){break;}   
+       if(ST>800){break;}   
         
       }
       digitalWrite(CWCCW_L,LOW);
       digitalWrite(CWCCW_R,HIGH);//バック
+
+      
+    Timer1.initialize(spchR(500));
+    Timer3.initialize(spchL(500));
             
       StepL=0;
       //delay(500);
@@ -651,14 +654,16 @@ void kaisyuu(){
             i++;
             }//前サーボ開く
   } 
+  //２個目のボール検出メモ参照
  void sortb(){
-    senkaiL(500,372);
+    senkaiL(500,360);
     Sfrag=0;//カウント進む
     tyokusin(500,100);
     while(1){
       trace(1.0);
       if(count==3){
         phase=6;
+        break;
         }
      }
   }
@@ -671,11 +676,12 @@ void kaisyuu(){
         if(count==DX){
           senkaiL(500,372);
           phase=6;
+          break;
           }
         }
   }
  void sortRY(){
-    senkaiL(500,372);
+    senkaiL(500,360);
     Sfrag=0;//カウント進む
     tyokusin(500,100);
     while(1){
@@ -683,12 +689,13 @@ void kaisyuu(){
         if(count==2){
           senkaiR(500,372);
           phase=6;
+          break;
           }
       }
   }
 
  void sortYR(){
-    senkaiR(500,372);
+    senkaiR(500,360);
     Sfrag=1;//カウント戻る
     tyokusin(500,100);
     while(1){
@@ -696,6 +703,7 @@ void kaisyuu(){
         if(count==1){
           senkaiL(500,372);
           phase=6;
+          break;
           }
       }
   }  

@@ -302,7 +302,7 @@ void loop() {
                 }                
                 phase=3;//２個目の探索へ
                 }else{
-                  senkaiR(500,360-DFL);
+                  senkaiR(500,350-DFL);
                   kousin(500,100);
                   i=-80;
                 while(i<0){
@@ -357,10 +357,13 @@ void loop() {
             case 6://赤                                 
              OUT();  
              ball--; 
-             if(ball==0){    
+             Serial.print("ball=");
+             Serial.println(ball);
+             if(ball==0){
+              Scfrag=0; //カウント進む   
              senkaiL(500,372);
              tyokusin(500,100);
-             count=2;
+             count=2;//要らない？
              phase=2;
             break;     
              }
@@ -369,15 +372,19 @@ void loop() {
               servo2(1300);
               i++;
              }
+             delay(1500);
              phase=7;    
             break;
-          
+        break;  
             case 7://青                    
-          
+                      
              OUTL();
              ball--;
-             if(ball==0){        
-             count=4;
+             Serial.print("ball=");
+             Serial.println(ball);
+             if(ball==0){
+              Sfrag=0;        
+             count=4;//要らない？
              phase=2;
             break;
              }
@@ -387,44 +394,51 @@ void loop() {
               servo2(1300);
               i++;
              }
-            
+            delay(1500);
              phase=7;
             break;
-          
+         break;
             case 8://黄色            
              OUT();
              ball--;
-             if(ball==0){    
+             Serial.print("ball=");
+             Serial.println(ball);
+             if(ball==0){
+              Sfrag=0;    
              senkaiL(500,372);
              tyokusin(500,100);
-             count=3;
+             count=3;//要らない？
              phase=2;
             break;     
              }
+            break;
+
              
              i=-80;//時間調整変数初期化
             while(i<0){
               servo2(1300);
               i++;
             }
+            delay(1500);
              phase=7;
             break;
           }
+          break;
       case 7:
        kakoiro=iro;//１個目の色を保存
        s=0,j=-100,i=-50;         
           iro=colorcheck();
           Serial.print("色判定結果");
           Serial.println(iro);//６：赤色、７：青色、８：黄色
-          if(iro==kakoiro){phase=6;}//同じ色の場合
+          if(iro==kakoiro){phase=6;Serial.println("同じ色のボール");}//同じ色の場合
           
-          if(iro==7&&(kakoiro==6||kakoiro==8)){sortb();}//黄色、赤色⇨青色
+          if(iro==7&&(kakoiro==6||kakoiro==8)){sortb();Serial.println("黄色、赤色⇨青色");}//黄色、赤色⇨青色
           
-          if(iro==6&&kakoiro==7){sortg(1.0);}//青色⇨赤色
-          if(iro==8&&kakoiro==7){sortg(2.0);}//青色⇨黄色
+          if(iro==6&&kakoiro==7){sortg(1.0);Serial.println("青色→赤色");}//青色⇨赤色
+          if(iro==8&&kakoiro==7){sortg(2.0);Serial.println("青色→黄色");}//青色⇨黄色
 
-          if(iro==8&&kakoiro==6){sortRY();}//赤色⇨黄色
-          if(iro==6&&kakoiro==8){sortYR();}//黄色⇨赤色
+          if(iro==8&&kakoiro==6){sortRY();Serial.println("赤色→黄色");}//赤色⇨黄色
+          if(iro==6&&kakoiro==8){sortYR();Serial.println("黄色→赤色");}//黄色⇨赤色
 
       break;
                    
