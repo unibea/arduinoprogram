@@ -207,7 +207,7 @@ void setup() {  ////////////////////////////////////////////////////////////////
   i = -10;  //時間調整変数初期化
 
   while (i < 0) {
-    servo3(1350);
+    servo3(1400);
     i++;
   }          //前方ｻｰﾎﾞﾃｽﾄと初期位置の出力
   i = -150;  //時間調整変数初期化
@@ -238,8 +238,8 @@ void loop() {
   switch (phase) {
     case 0:
       Serial.print("スタート");
-      //tyokusinS();
-      servo3(1600);
+      tyokusinS();
+      //servo3(2250);
       //senkaiL(500,357);//90度旋回試験用
       if (count == 2) {
         phase = 1;
@@ -340,7 +340,14 @@ void loop() {
         kousin(500, 1100);
         tyokusin(500, 785);
         senkaiR(500, 360);
-        kousin(500, 250);
+        delay(50000);
+        if(GET<=4){
+          tyokusin(700,1500);
+          kousin(700,1500);
+        }else if(5<=GET && GET<=8){
+          tyokusin(700,2000);
+          kousin(700,2000);
+        }
         Sfrag = 1;  //進行方向変更
         s = 0, j = -100, i = -50;
         iro = colorcheck();

@@ -520,7 +520,7 @@ int tansaku() {
   while (xai < 1) {
     i = -10;
     while (i < 0) {
-      servo3(800);
+      servo3(1400);
       i++;
     }  //前サーボ下げる
     xai++;
@@ -580,7 +580,7 @@ int tansaku() {
     //DFL=StepL;
     //DFR=StepR;
     for (int i = 0; i < 80; i++) {
-      servo3(1700);
+      servo3(2250);
       servo1(1000);
     }
     return 4;
